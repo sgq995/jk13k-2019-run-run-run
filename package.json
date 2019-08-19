@@ -1,0 +1,21 @@
+{
+  "name": "js13k-2019-back",
+  "version": "1.0.0",
+  "description": "A JS game in just 13kB",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sebastian",
+  "license": "MIT",
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-htmlmin": "^5.0.1",
+    "gulp-jshint": "^2.1.0",
+    "gulp-uglify": "^3.0.2",
+    "gulp-zip": "^5.0.0",
+    "jshint": "^2.10.2",
+    "webpack-stream": "^5.2.1"
+  },
+  "dependencies": {}
+}
