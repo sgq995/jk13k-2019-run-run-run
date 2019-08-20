@@ -1,6 +1,7 @@
 const gulp = require('gulp');
 const jshint = require('gulp-jshint');
 const webpack = require('webpack-stream');
+const babel = require('gulp-babel');
 const uglify = require('gulp-uglify');
 const htmlmin = require('gulp-htmlmin');
 const zip = require('gulp-zip');
@@ -24,6 +25,7 @@ function jsBuild(cb) {
                 filename: jsOutputFilename
             }
         }))
+        .pipe(babel())
         .pipe(uglify())
         .pipe(gulp.dest(outputDir));
 }
@@ -63,8 +65,8 @@ const build = gulp.parallel(jsBuild, htmlMinify);
 const buildDev = gulp.parallel(jsBuildDev, htmlMinifyDev);
 
 function watch(cb) {
-    gulp.watch(js, jsBuild);
-    gulp.watch(html, htmlMinify);
+    gulp.watch('src/*.js', jsBuild);
+    gulp.watch('src/*.html', htmlMinify);
 }
 
 const publish = gulp.series(gulp.parallel(jsBuild, htmlMinify), (cb) => {
