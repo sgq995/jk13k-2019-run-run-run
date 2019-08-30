@@ -1,8 +1,10 @@
-import Renderer from './renderer.js'
+import { Renderer } from './renderer';
+import { Runner } from './runner';
 
-class App {
+export default class App {
     constructor() {
         this.renderer = new Renderer('game-render');
+        this.entities = [];
     }
 
     start() {
@@ -13,8 +15,9 @@ class App {
         requestAnimationFrame(() => this.run());
 
         this.renderer.clear();
-        this.renderer.draw();
+
+        this.entities.forEach(sprite => {
+            sprite.draw(this.renderer.context);
+        });
     }
 }
-
-export default App;
