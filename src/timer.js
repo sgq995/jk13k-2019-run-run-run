@@ -1,21 +1,27 @@
 export class Timer {
-    constructor(target=0) {
-        this.startTick = 0;
+    constructor(clock, target=0) {
+        this.clock = clock;
+        
+        this.startTick = this.clock.getTicks();
         this.currentTick = 0;
         this.previousTick = 0;
 
-        this.deltaTickTarget = target;
+        this.targetTicks = target;
     }
     
     reset() {
-        this.startTick = Date.now();
+        this.startTick = this.clock.getTicks();
         this.currentTick = this.startTick;
         this.previousTick = this.startTick;
     }
 
+    update() {
+        this.currentTick = this.clock.getTicks();
+    }
+
     tick() {
         this.previousTick = this.currentTick;
-        this.currentTick = Date.now();
+        this.currentTick = this.clock.getTicks();
     }
 
     delta() {
@@ -27,6 +33,6 @@ export class Timer {
     }
 
     timeout() {
-        return this.delta() > this.deltaTickTarget;
+        return this.delta() > this.targetTicks;
     }
 }
