@@ -21,12 +21,13 @@ function jsBuild(cb) {
         .pipe(jshint.reporter('default'))
         .pipe(webpack({
             mode: 'production',
+            
             output: {
                 filename: jsOutputFilename
             }
         }))
         .pipe(babel())
-        .pipe(uglify())
+        // .pipe(uglify())
         .pipe(gulp.dest(outputDir));
 }
 
