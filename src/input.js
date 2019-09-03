@@ -41,10 +41,10 @@ export class Input {
 
     handle(delta) {
         if (Keyboard.VK_LEFT) {
-            this.target.x -= delta/1000 * 160;
+            this.target.x -= delta * 160;
         }
         if (Keyboard.VK_RIGHT) {
-            this.target.x += delta/1000 * 160;
+            this.target.x += delta * 160;
         }
     }
 }
