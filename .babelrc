@@ -1,12 +1,12 @@
 {
     "presets": [
-        "minify"
-        /*[
+        // "minify"
+        [
             "@babel/preset-env",
             {
                 "modules": false,
                 "useBuiltIns": false
             }
-        ]*/
+        ]
     ],
 }
