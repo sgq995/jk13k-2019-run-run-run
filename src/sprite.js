@@ -1,13 +1,12 @@
+import { Rect } from "./rect";
+
 export class Sprite {
-    constructor(image=null, x=0, y=0, width=0, height=0) {
+    constructor(image=null, rect=Rect()) {
         this.image = image;
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+        this.rect = rect;
     }
 
-    static async loadFrom(path) {
+    /*static async loadFrom(path) {
         let image = new Image();
         return new Promise((resolve, reject) => {
             image.onload(() => {
@@ -18,9 +17,10 @@ export class Sprite {
             });
             image.src = path;
         });
-    }
+    }*/
 
     draw(context) {
-        context.drawImage(this.image, this.x, this.y, this.width, this.height);
+        context.drawImage(this.image, 
+            this.rect.x, this.rect.y, this.rect.width, this.rect.height);
     }
 }

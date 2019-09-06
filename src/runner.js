@@ -1,12 +1,13 @@
 import { Sprite } from './sprite';
 import { Timer } from './timer';
+import { Rect } from './rect';
 
 const DEFAULT_ANIM_TIME    = 200;
 const DEFAULT_RUNNER_SPEED = 30;
 
 export class Runner extends Sprite {
-    constructor(clock, { x=0, y=0, width=160, height=256 }, speed=DEFAULT_RUNNER_SPEED) {
-        super(Runner.buildRunnerImage(), { x, y, width, height });
+    constructor(clock, rect=Rect(right=160, bottom=256), speed=DEFAULT_RUNNER_SPEED) {
+        super(Runner.buildRunnerImage(), rect);
 
         this.speed = speed;
 
@@ -19,13 +20,17 @@ export class Runner extends Sprite {
         canvas.width = 20;
         canvas.height = 32;
 
-        const image = canvas.getContext('2d');
-        image.fillStyle = '#00f';
-        image.fillRect(0, 0, canvas.width, canvas.height / 2);
-        image.fillStyle = '#0f0';
-        image.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
+        const context = canvas.getContext('2d');
+        context.fillStyle = '#00f';
+        context.fillRect(0, 0, canvas.width, canvas.height / 2);
+        context.fillStyle = '#0f0';
+        context.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
 
         return canvas;
+    }
+
+    collides(other) {
+        return this.rect.collides(other.rect);
     }
 
     update(deltaTime) {
@@ -36,7 +41,7 @@ export class Runner extends Sprite {
             this.animSpeed *= -1;
         }
 
-        this.y += deltaTime * this.animSpeed;
+        this.rect.y += deltaTime * this.animSpeed;
     }
 }
 
@@ -51,6 +56,6 @@ export class AutonomousRunner extends Runner {
         super.update(deltaTime);
 
         let speed = this.targetSpeed - this.speed;
-        this.y += deltaTime * speed;
+        this.rect.y += deltaTime * speed;
     }
 }
