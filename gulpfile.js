@@ -27,8 +27,8 @@ function jsBuild(cb) {
             }
         }))
         .pipe(babel())
-        .pipe(uglify())
-        .pipe(babel({ presets: ['minify'] }))
+        // .pipe(babel({ presets: ['minify'] }))
+        // .pipe(uglify())
         .pipe(gulp.dest(outputDir));
 }
 

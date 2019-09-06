@@ -1,12 +1,15 @@
 {
     "presets": [
-        // "minify"
         [
             "@babel/preset-env",
             {
+                "loose": true,
                 "modules": false,
-                "useBuiltIns": false
+                "useBuiltIns": false,
+                "forceAllTransforms": true
             }
-        ]
+        ],
+        "minify"
     ],
+    "minified": true,
 }
