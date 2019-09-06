@@ -1,3 +1,5 @@
+import { Rect } from "./rect";
+
 const Keyboard = {
     VK_UP: false,
     VK_RIGHT: false,
@@ -35,8 +37,8 @@ document.addEventListener('keydown', (e) => { handler(e, true); });
 document.addEventListener('keyup', (e) => { handler(e, false); });
 
 export class Input {
-    constructor(sprite) {
-        this.target = sprite;
+    constructor(rect=Rect()) {
+        this.target = rect;
     }
 
     handle(delta) {

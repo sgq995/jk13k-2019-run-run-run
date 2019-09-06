@@ -3,6 +3,7 @@ import { Renderer } from './renderer';
 import { Runner, AutonomousRunner } from './runner';
 import { Clock } from './clock';
 import { Timer } from './timer';
+import { Rect } from './rect';
 
 export class App {
     constructor() {
@@ -16,15 +17,20 @@ export class App {
         this.clock = new Clock(1);
         this.timer = new Timer(this.clock);
 
+        this.score = 0;
+
         this.renderer = new Renderer('game-render');
 
-        this.player = new Runner(this.clock, { x: 160, y: 384 });
+        const playerRect = new Rect(160, 384);
+        playerRect.width = 160;
+        playerRect.height = 256;
+        this.player = new Runner(this.clock, playerRect);
         this.runnerList = [
-            new AutonomousRunner(this.player.speed, this.clock, { x: 20, y: 20, width: 80, height: 128 }, 15),
-            new AutonomousRunner(this.player.speed, this.clock, { x: 320, y: 20, width: 80, height: 128 }, 5)
+            new AutonomousRunner(this.player.speed, this.clock, Rect.from({ x: 20, y: 20, width: 80, height: 128 }), 15),
+            new AutonomousRunner(this.player.speed, this.clock, Rect.from({ x: 320, y: 20, width: 80, height: 128 }), 5)
         ];
 
-        this.input = new Input(this.player);
+        this.input = new Input(playerRect);
     }
 
     start() {
@@ -53,15 +59,41 @@ export class App {
             runner.update(deltaTime);
         });
         this.player.update(deltaTime);
+
+        this.runnerList.forEach(runner => {
+            const context = runner.image.getContext('2d');
+            if (this.player.collides(runner)) {
+                context.fillStyle = '#f00';
+                context.fillRect(0, 0, runner.image.width, runner.image.height);
+            } else {
+                context.fillStyle = '#00f';
+                context.fillRect(0, 0, runner.image.width, runner.image.height);
+            }
+        });
+
+        if (this.timer.deltaStart() > 500) {
+            this.timer.reset();
+            this.score++;
+        }
     }
 
     draw() {
+        const context = this.renderer.context;
+        const displayWidth = this.renderer.canvas.width;
+        const displayHeight = this.renderer.canvas.height;
+
         this.renderer.clear();
 
         this.runnerList.forEach(runner => {
-            runner.draw(this.renderer.context);
+            runner.draw(context);
         });
-        this.player.draw(this.renderer.context);
+        this.player.draw(context);
+
+        const font = context.font;
+        context.font = '30px sans-serif';
+        context.textAlign = 'center';
+        context.fillText(`${this.score}`, displayWidth / 2, 30);
+        context.font = font;
     }
 
     run(timestamp=0) {
