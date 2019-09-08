@@ -21,7 +21,7 @@ export class App {
 
         this.renderer = new Renderer('game-render');
 
-        const playerRect = new Rect(160, 384);
+        const playerRect = new Rect(160, 360);
         playerRect.width = 160;
         playerRect.height = 256;
         this.player = new Runner(this.clock, playerRect);
@@ -30,7 +30,7 @@ export class App {
             new AutonomousRunner(this.player.speed, this.clock, Rect.from({ x: 320, y: 20, width: 80, height: 128 }), 5)
         ];
 
-        this.input = new Input(playerRect);
+        this.input = new Input(this.player);
     }
 
     start() {
@@ -78,22 +78,22 @@ export class App {
     }
 
     draw() {
-        const context = this.renderer.context;
-        const displayWidth = this.renderer.canvas.width;
-        const displayHeight = this.renderer.canvas.height;
-
         this.renderer.clear();
 
-        this.runnerList.forEach(runner => {
-            runner.draw(context);
-        });
-        this.player.draw(context);
+        const frontRunners = this.runnerList.filter(runner => runner.y <= this.player.y);
+        const backRunners = this.runnerList.filter(runner => runner.y > this.player.y);
 
-        const font = context.font;
-        context.font = '30px sans-serif';
-        context.textAlign = 'center';
-        context.fillText(`${this.score}`, displayWidth / 2, 30);
-        context.font = font;
+        const drawRunner = runner => {
+            if (!this.renderer.drawSprite(runner)) {
+                runner.y = 0;
+            }
+        };
+
+        frontRunners.forEach(drawRunner);
+        this.renderer.drawSprite(this.player);
+        backRunners.forEach(drawRunner);
+
+        this.renderer.drawScore(this.score);
     }
 
     run(timestamp=0) {

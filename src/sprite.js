@@ -3,7 +3,7 @@ import { Rect } from "./rect";
 export class Sprite {
     constructor(image=null, rect=Rect()) {
         this.image = image;
-        this.rect = rect;
+        this.imageRect = rect;
     }
 
     /*static async loadFrom(path) {
@@ -21,6 +21,6 @@ export class Sprite {
 
     draw(context) {
         context.drawImage(this.image, 
-            this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+            this.imageRect.x, this.imageRect.y, this.imageRect.width, this.imageRect.height);
     }
 }
