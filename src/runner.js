@@ -4,26 +4,33 @@ import { Rect } from './rect';
 
 const MIN_RUNNER_WIDTH  = 80;
 const MIN_RUNNER_HEIGHT = 128;
-const MAX_RUNNER_WIDTH  = 160;
-const MAX_RUNNER_HEIGHT = 256;
+
+const DEFAULT_RUNNER_X      = 180; 
+const DEFAULT_RUNNER_Y      = 360;
+const DEFAULT_RUNNER_WIDTH  = 120;
+const DEFAULT_RUNNER_HEIGHT = 256;
+
+const MAX_DEPTH = 100;
 
 const DEFAULT_DEPTH        = 0;
 const DEFAULT_ANIM_TIME    = 200;
 const DEFAULT_RUNNER_SPEED = 30;
 
 export class Runner extends Sprite {
-    constructor(clock, rect=Rect(right=MAX_RUNNER_WIDTH, bottom=MAX_RUNNER_HEIGHT), speed=DEFAULT_RUNNER_SPEED, depth=DEFAULT_DEPTH) {
+    constructor(clock, rect=new Rect(DEFAULT_RUNNER_X, DEFAULT_RUNNER_Y, DEFAULT_RUNNER_X+DEFAULT_RUNNER_WIDTH, DEFAULT_RUNNER_Y+DEFAULT_RUNNER_HEIGHT), speed=DEFAULT_RUNNER_SPEED, depth=DEFAULT_DEPTH) {
         super(Runner.buildRunnerImage(), rect);
+
+        this.speed = speed;
+        this.depth = Math.min(depth, MAX_DEPTH);
+
+        // this.imageRect.width = this.depth * (DEFAULT_RUNNER_WIDTH - MIN_RUNNER_WIDTH) / MAX_DEPTH + MIN_RUNNER_WIDTH;
 
         this.collisionRect = new Rect(
             this.imageRect.left + this.imageRect.width * 0.1, 
             this.imageRect.top + this.imageRect.height / 2,
             this.imageRect.right - this.imageRect.width * 0.1,
             this.imageRect.bottom);
-
-        this.speed = speed;
-        this.depth = depth;
-
+        
         this.animTimer = new Timer(clock, DEFAULT_ANIM_TIME * DEFAULT_RUNNER_SPEED / speed);
         this.animSpeed = -speed;
     }
@@ -46,7 +53,8 @@ export class Runner extends Sprite {
 
     set x(value) {
         this.imageRect.x = value;
-        this.collisionRect.x = value + this.imageRect.width * 0.1;
+        this.collisionRect.x = this.imageRect.x + 0.1 * this.imageRect.width;
+        this.collisionRect.width = 0.8 * this.imageRect.width;
     }
 
     get y() {
@@ -64,7 +72,8 @@ export class Runner extends Sprite {
 
     set width(value) {
         this.imageRect.width = value;
-        this.collisionRect.right = this.imageRect.left + this.imageRect.width * 0.1;
+        this.collisionRect.x = this.imageRect.x + 0.1 * this.imageRect.width;
+        this.collisionRect.width = 0.8 * this.imageRect.width;
     }
 
     get height() {
@@ -114,7 +123,21 @@ export class AutonomousRunner extends Runner {
         super.update(deltaTime);
 
         let speed = this.targetSpeed - this.speed;
-        this.imageRect.y += deltaTime * speed;
-        this.collisionRect.y += deltaTime * speed;
+        let deltaY = deltaTime * speed;
+        
+        this.y += deltaY;
+        
+        let newHeight = this.y / DEFAULT_RUNNER_Y * DEFAULT_RUNNER_HEIGHT;
+        this.height = newHeight;
+        
+        const threshold = DEFAULT_RUNNER_X + DEFAULT_RUNNER_WIDTH / 2;
+
+        let newWidth = this.y / DEFAULT_RUNNER_Y * DEFAULT_RUNNER_WIDTH;
+        if (this.x > threshold) {
+            this.width = newWidth;    
+        } else if (this.x < threshold) {
+            this.x += this.width - newWidth;
+            this.width = newWidth;
+        }
     }
 }
