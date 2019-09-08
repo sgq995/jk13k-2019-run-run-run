@@ -9,6 +9,10 @@ export class Timer {
         this.targetTicks = target;
     }
     
+    setTimeout(timeout) {
+        this.targetTicks = timeout;
+    }
+
     reset() {
         this.startTick = this.clock.getTicks();
         this.currentTick = this.startTick;

@@ -4,6 +4,7 @@ import { Runner, AutonomousRunner } from './runner';
 import { Clock } from './clock';
 import { Timer } from './timer';
 import { Rect } from './rect';
+import { RunnerSpawner } from './spawner';
 
 export class App {
     constructor() {
@@ -23,9 +24,10 @@ export class App {
 
         this.player = new Runner(this.clock);
         this.runnerList = [
-            new AutonomousRunner(this.player.speed, this.clock, Rect.from({ x: 140, y: 40/*, width: 80, height: 128*/ }), 15),
-            new AutonomousRunner(this.player.speed, this.clock, Rect.from({ x: 320, y: 40/*, width: 80, height: 128*/ }), 5)
+            // new AutonomousRunner(this.player.speed, this.clock, Rect.from({ x: 140, y: 40/*, width: 80, height: 128*/ }), 15),
+            // new AutonomousRunner(this.player.speed, this.clock, Rect.from({ x: 320, y: 40/*, width: 80, height: 128*/ }), 5)
         ];
+        this.runnerSpawner = new RunnerSpawner(this.clock, this.player);
 
         this.input = new Input(this.player);
     }
@@ -50,13 +52,20 @@ export class App {
         this.running = false;
     }
 
-    update(deltaTime) {        
-        this.runnerList.forEach(runner => {
-            runner.update(deltaTime);
-        });
+    update(deltaTime) {
+        let newRunner = this.runnerSpawner.update();
+        if (newRunner !== null && newRunner instanceof AutonomousRunner) {
+            this.runnerList.push(newRunner);
+        }
+        
         this.player.x += this.input.delta.x;
         this.player.update(deltaTime);
 
+        this.runnerList.forEach(runner => {
+            runner.update(deltaTime);
+        });
+        this.runnerList.filter(runner => this.renderer.isVisible(runner));
+        this.runnerList.sort((runnerA, runnerB) => runnerA.y - runnerB.y);
         this.runnerList.forEach(runner => {
             const context = runner.image.getContext('2d');
             if (this.player.collides(runner)) {
@@ -80,11 +89,7 @@ export class App {
         const frontRunners = this.runnerList.filter(runner => runner.y <= this.player.y);
         const backRunners = this.runnerList.filter(runner => runner.y > this.player.y);
 
-        const drawRunner = runner => {
-            if (!this.renderer.drawSprite(runner)) {
-                runner.y = 0;
-            }
-        };
+        const drawRunner = runner => this.renderer.drawSprite(runner);
 
         frontRunners.forEach(drawRunner);
         this.renderer.drawSprite(this.player);
