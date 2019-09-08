@@ -34,7 +34,31 @@ export class Renderer {
         }
     }
 
+    drawPaused() {
+        this.context.font = '60px sans-serif';
+        this.context.textAlign = 'center';
+        this.context.fillText('PAUSED', this.rect.width / 2, this.rect.height / 2);
+    }
+
     clear() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        const platformLimit = this.rect.height / 8;
+        const platformWidth = this.rect.width / 2 * Math.cos(Math.PI / 3);
+
+        this.context.beginPath();
+        this.context.moveTo(0, platformLimit);
+        this.context.lineTo(this.rect.width, platformLimit);
+        this.context.stroke();
+
+        this.context.beginPath();
+        this.context.moveTo(0, this.rect.height / 2);
+        this.context.lineTo(platformWidth, platformLimit);
+        this.context.stroke();
+
+        this.context.beginPath();
+        this.context.moveTo(this.rect.width, this.rect.height / 2);
+        this.context.lineTo(this.rect.width - platformWidth, platformLimit);
+        this.context.stroke();
     }
 }
