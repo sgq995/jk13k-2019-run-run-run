@@ -21,13 +21,10 @@ export class App {
 
         this.renderer = new Renderer('game-render');
 
-        const playerRect = new Rect(160, 360);
-        playerRect.width = 160;
-        playerRect.height = 256;
-        this.player = new Runner(this.clock, playerRect);
+        this.player = new Runner(this.clock);
         this.runnerList = [
-            new AutonomousRunner(this.player.speed, this.clock, Rect.from({ x: 20, y: 20, width: 80, height: 128 }), 15),
-            new AutonomousRunner(this.player.speed, this.clock, Rect.from({ x: 320, y: 20, width: 80, height: 128 }), 5)
+            new AutonomousRunner(this.player.speed, this.clock, Rect.from({ x: 140, y: 40/*, width: 80, height: 128*/ }), 15),
+            new AutonomousRunner(this.player.speed, this.clock, Rect.from({ x: 320, y: 40/*, width: 80, height: 128*/ }), 5)
         ];
 
         this.input = new Input(this.player);
@@ -35,6 +32,7 @@ export class App {
 
     start() {
         this.clock.reset();
+        this.running = true;
         this.requestAnimationId = requestAnimationFrame(timestamp => this.run(timestamp), this.renderer.canvas);
     }
 
@@ -43,21 +41,20 @@ export class App {
     }
 
     resume() {
+        console.log('game is resumed');
         this.running = true;
     }
 
     pause() {
+        console.log('game is paused');
         this.running = false;
     }
 
-    update() {
-        let deltaTime = this.clock.ticksToSeconds(this.timer.delta());
-        
-        this.input.handle(deltaTime);
-        
+    update(deltaTime) {        
         this.runnerList.forEach(runner => {
             runner.update(deltaTime);
         });
+        this.player.x += this.input.delta.x;
         this.player.update(deltaTime);
 
         this.runnerList.forEach(runner => {
@@ -94,6 +91,10 @@ export class App {
         backRunners.forEach(drawRunner);
 
         this.renderer.drawScore(this.score);
+
+        if (!this.running) {
+            this.renderer.drawPaused();
+        }
     }
 
     run(timestamp=0) {
@@ -102,7 +103,18 @@ export class App {
         this.clock.update(timestamp);
         this.timer.tick();
 
-        this.update();
+        let deltaTime = this.clock.ticksToSeconds(this.timer.delta());
+        
+        this.input.handle(deltaTime);
+
+        if (this.input.isPausePressed) {
+            this.running = !this.running;
+        }
+
+        if (this.running) {
+            this.update(deltaTime);
+        }
+
         this.draw();
     }
 }

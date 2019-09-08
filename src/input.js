@@ -1,6 +1,8 @@
 import { Rect } from "./rect";
 
 const Keyboard = {
+    VK_PAUSE: false,
+
     VK_UP: false,
     VK_RIGHT: false,
     VK_DOWN: false,
@@ -8,6 +10,11 @@ const Keyboard = {
 };
 const handler = (e, v) => {
     switch (e.keyCode) {
+        case 27:
+        case 80:
+            Keyboard.VK_PAUSE = v;
+            break;
+
         case 38:
         case 90:
         case 87:
@@ -37,16 +44,33 @@ document.addEventListener('keydown', (e) => { handler(e, true); });
 document.addEventListener('keyup', (e) => { handler(e, false); });
 
 export class Input {
-    constructor(rect=Rect()) {
-        this.target = rect;
+    constructor() {
+        this.delta = new Rect();
+
+        this.pausePressed = false;
+        this.pauseKeyCurrentState = Keyboard.VK_PAUSE;
+        this.pauseKeyPreviousState = this.pauseKeyCurrentState;
+    }
+
+    get isPausePressed() {
+        let pausePressed = this.pausePressed;
+        this.pausePressed = false;
+        return pausePressed;
     }
 
     handle(delta) {
-        if (Keyboard.VK_LEFT) {
-            this.target.x -= delta * 160;
+        this.pauseKeyCurrentState = Keyboard.VK_PAUSE;
+        if (this.pauseKeyCurrentState === false && this.pauseKeyPreviousState === true) {
+            this.pausePressed = true;
         }
-        if (Keyboard.VK_RIGHT) {
-            this.target.x += delta * 160;
+        this.pauseKeyPreviousState = this.pauseKeyCurrentState;
+        
+        if (Keyboard.VK_LEFT) {
+            this.delta.x = -delta * 160;
+        } else if (Keyboard.VK_RIGHT) {
+            this.delta.x = delta * 160;
+        } else {
+            this.delta.x = 0;
         }
     }
 }
