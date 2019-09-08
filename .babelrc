@@ -8,8 +8,7 @@
                 "useBuiltIns": false,
                 "forceAllTransforms": true
             }
-        ],
-        "minify"
+        ]
     ],
     "minified": true,
 }

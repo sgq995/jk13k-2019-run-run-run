@@ -67,8 +67,8 @@ const build = gulp.parallel(jsBuild, htmlMinify);
 const buildDev = gulp.parallel(jsBuildDev, htmlMinifyDev);
 
 function watch(cb) {
-    gulp.watch('src/*.js', jsBuild);
-    gulp.watch('src/*.html', htmlMinify);
+    gulp.watch('src/*.js', gulp.series(jsBuild));
+    gulp.watch('src/*.html', gulp.series(htmlMinify));
 }
 
 const publish = gulp.series(gulp.parallel(jsBuild, htmlMinify), (cb) => {
