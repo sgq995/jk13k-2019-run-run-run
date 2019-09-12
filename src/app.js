@@ -5,6 +5,8 @@ import { Clock } from './clock';
 import { Timer } from './timer';
 import { Rect } from './rect';
 import { RunnerSpawner } from './spawner';
+import { CPlayer } from './player-small';
+import { song_running } from './song_running';
 
 export class App {
     constructor() {
@@ -22,6 +24,22 @@ export class App {
 
         this.renderer = new Renderer('game-render');
 
+        this.songManager = new CPlayer();
+        this.songManager.init(song_running);
+        this.audio = document.createElement('audio');
+        const id = setInterval(() => {
+            const done = this.songManager.generate() >= 1;
+            if (done) {
+                clearInterval(id);
+                const wave = this.songManager.createWave();
+                const src = URL.createObjectURL(new Blob([wave], {type: 'audio/wav'}));
+                // console.log(src);
+                this.audio.loop = true;
+                this.audio.src = src;
+                this.audio.play();
+            }
+        }, 0);
+
         this.player = new Runner(this.clock);
         this.runnerList = [
             // new AutonomousRunner(this.player.speed, this.clock, Rect.from({ x: 140, y: 40/*, width: 80, height: 128*/ }), 15),
@@ -34,32 +52,39 @@ export class App {
 
     start() {
         this.clock.reset();
-        this.running = true;
         this.requestAnimationId = requestAnimationFrame(timestamp => this.run(timestamp), this.renderer.canvas);
+        this.resume();
     }
 
     stop() {
+        this.pause();
         this.requestAnimationId = cancelAnimationFrame(this.requestAnimationId);
     }
 
     resume() {
-        console.log('game is resumed');
+        this.runnerSpawner.reset();
+        this.audio.play();
         this.running = true;
     }
 
     pause() {
-        console.log('game is paused');
         this.running = false;
+        this.audio.pause();
     }
 
     update(deltaTime) {
-        let newRunner = this.runnerSpawner.update();
+        let newRunner = this.runnerSpawner.spawn();
         if (newRunner !== null && newRunner instanceof AutonomousRunner) {
             this.runnerList.push(newRunner);
         }
         
         this.player.x += this.input.delta.x;
         this.player.update(deltaTime);
+        if (this.player.x < 0) {
+            this.player.x = 0;
+        } else if ((this.player.x + this.player.width) > this.renderer.rect.width) {
+            this.player.x = this.renderer.rect.width - this.player.width;
+        }
 
         this.runnerList.forEach(runner => {
             runner.update(deltaTime);
@@ -113,7 +138,11 @@ export class App {
         this.input.handle(deltaTime);
 
         if (this.input.isPausePressed) {
-            this.running = !this.running;
+            if (this.running) {
+                this.pause();
+            } else {
+                this.resume();
+            }
         }
 
         if (this.running) {
