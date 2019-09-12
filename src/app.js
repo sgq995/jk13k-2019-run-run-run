@@ -8,6 +8,8 @@ import { RunnerSpawner } from './spawner';
 import { CPlayer } from './player-small';
 import { song_running } from './song_running';
 
+const timeoutList = [500, 500, 250, 250, 500, 500, 500, 1000, 500, 500, 250, 250, 250, 250, 500, 1500];
+
 export class App {
     constructor() {
         document.addEventListener('visibilitychange', e => document['hidden'] ? this.stop() : this.start());
@@ -20,6 +22,8 @@ export class App {
         this.clock = new Clock(1);
         this.timer = new Timer(this.clock);
 
+        this.currentScoreIdx = 0;
+        this.currentScoreTimeout = timeoutList[this.currentScoreIdx];
         this.score = 0;
 
         this.renderer = new Renderer('game-render');
@@ -102,8 +106,18 @@ export class App {
             }
         });
 
-        if (this.timer.deltaStart() > 500) {
+        if (this.timer.deltaStart() >= this.currentScoreTimeout) {
             this.timer.reset();
+
+            const nextScoreIdx = (this.currentScoreIdx + 1) % timeoutList.length;
+            const nextScoreTimeout = timeoutList[nextScoreIdx];
+            
+            this.currentScoreIdx = nextScoreIdx;
+            this.currentScoreTimeout = nextScoreTimeout;
+            if (this.timer.deltaStart() > this.currentSocreTimeout) {
+                this.currentScoreTimeout -= this.timer.deltaStart() - this.currentScoreTimeout;
+            }
+            
             this.score++;
         }
     }
