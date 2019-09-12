@@ -25,11 +25,13 @@ export class Runner extends Sprite {
 
         // this.imageRect.width = this.depth * (DEFAULT_RUNNER_WIDTH - MIN_RUNNER_WIDTH) / MAX_DEPTH + MIN_RUNNER_WIDTH;
 
+        let dx = 0.1 * this.imageRect.width;
+        let dy = this.imageRect.height / 4;
         this.collisionRect = new Rect(
-            this.imageRect.left + this.imageRect.width * 0.1, 
-            this.imageRect.top + this.imageRect.height / 2,
-            this.imageRect.right - this.imageRect.width * 0.1,
-            this.imageRect.bottom);
+            this.imageRect.left + dx, 
+            this.imageRect.top + dy,
+            this.imageRect.right - dx,
+            this.imageRect.bottom - dy);
         
         this.animTimer = new Timer(clock, DEFAULT_ANIM_TIME * DEFAULT_RUNNER_SPEED / speed);
         this.animSpeed = -speed;
@@ -53,8 +55,13 @@ export class Runner extends Sprite {
 
     set x(value) {
         this.imageRect.x = value;
-        this.collisionRect.x = this.imageRect.x + 0.1 * this.imageRect.width;
-        this.collisionRect.width = 0.8 * this.imageRect.width;
+
+        // this.collisionRect.x = this.imageRect.x + 0.1 * this.imageRect.width;
+        // this.collisionRect.width = 0.8 * this.imageRect.width;
+        
+        let dx = 0.1 * this.imageRect.width;
+        this.collisionRect.left = this.imageRect.left + dx;
+        this.collisionRect.right = this.imageRect.right - dx;
     }
 
     get y() {
@@ -63,7 +70,12 @@ export class Runner extends Sprite {
 
     set y(value) {
         this.imageRect.y = value;
-        this.collisionRect.y = value + this.imageRect.height / 2;
+        
+        // this.collisionRect.y = value + this.imageRect.height / 2;
+        
+        let dy = this.imageRect.height / 4;
+        this.collisionRect.top = this.imageRect.top + dy;
+        this.collisionRect.bottom = this.imageRect.bottom + dy;
     }
 
     get width() {
@@ -72,8 +84,12 @@ export class Runner extends Sprite {
 
     set width(value) {
         this.imageRect.width = value;
-        this.collisionRect.x = this.imageRect.x + 0.1 * this.imageRect.width;
-        this.collisionRect.width = 0.8 * this.imageRect.width;
+
+        // this.collisionRect.x = this.imageRect.x + 0.1 * this.imageRect.width;
+        // this.collisionRect.width = 0.8 * this.imageRect.width;
+        let dx = 0.1 * this.imageRect.width;
+        this.collisionRect.left = this.imageRect.left + dx;
+        this.collisionRect.right = this.imageRect.right - dx;
     }
 
     get height() {
@@ -82,7 +98,11 @@ export class Runner extends Sprite {
 
     set height(value) {
         this.imageRect.height = value;
-        this.collisionRect.bottom = this.imageRect.bottom;
+
+        // this.collisionRect.bottom = this.imageRect.bottom;
+        let dy = this.imageRect.height / 4;
+        this.collisionRect.top = this.imageRect.top + dy;
+        this.collisionRect.bottom = this.imageRect.bottom - dy;
     } 
 
     collides(other) {
