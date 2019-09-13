@@ -8,12 +8,17 @@ import { RunnerSpawner } from './spawner';
 import { CPlayer } from './player-small';
 import { song_running } from './song_running';
 
+const GAME_INIT_STATE = 0;
+const GAME_RUNNING_STATE = 1;
+const GAME_FOCUS_LOST_STATE = 2;
+const GAME_PAUSED_STATE = 3;
+const GAME_LOSE_STATE = 4;
+
 const TIMEOUT_LIST = [500, 500, 250, 250, 500, 500, 500, 1000, 500, 500, 250, 250, 250, 250, 500, 1500];
 
 export class App {
     constructor() {
-        this.started = false;
-        this.running = false;
+        this.state = GAME_INIT_STATE;
         this.requestAnimationId = -1;
 
         this.clock = new Clock(1);
@@ -35,10 +40,8 @@ export class App {
                 clearInterval(id);
                 const wave = this.songManager.createWave();
                 const src = URL.createObjectURL(new Blob([wave], {type: 'audio/wav'}));
-                // console.log(src);
                 this.audio.loop = true;
                 this.audio.src = src;
-                this.audio.play();
             }
         }, 0);
 
@@ -49,9 +52,23 @@ export class App {
 
         this.input = new Input(this.player);
 
-        document.addEventListener('visibilitychange', e => document['hidden'] ? this.stop() : this.start());
-        window.addEventListener('blur', e => this.pause());
-        window.addEventListener('focus', e => this.resume());
+        document.addEventListener('visibilitychange', e => {
+            if (this.state === GAME_RUNNING_STATE || this.state === GAME_FOCUS_LOST_STATE) {
+                document['hidden'] ? this.stop() : this.start();
+            }
+        });
+        window.addEventListener('blur', e => {
+            if (this.state === GAME_RUNNING_STATE) {
+                this.pause();
+                this.state = GAME_FOCUS_LOST_STATE;
+            }
+        });
+        window.addEventListener('focus', e => {
+            if (this.state === GAME_FOCUS_LOST_STATE) {
+                this.resume();
+                this.state = GAME_RUNNING_STATE;
+            }
+        });
     }
 
     start() {
@@ -65,15 +82,17 @@ export class App {
         this.requestAnimationId = cancelAnimationFrame(this.requestAnimationId);
     }
 
-    resume() {
-        this.audio.play();
-        this.runnerSpawner.reset();
-        this.running = true;
+    resume(force=false) {
+        if (force || this.state === GAME_RUNNING_STATE || this.state === GAME_FOCUS_LOST_STATE || this.state === GAME_PAUSED_STATE) {
+            this.audio.play();
+            this.runnerSpawner.reset();
+        }
     }
 
     pause() {
-        this.running = false;
-        this.audio.pause();
+        if (this.state === GAME_RUNNING_STATE) {
+            this.audio.pause();
+        }
     }
 
     update(deltaTime) {
@@ -93,7 +112,14 @@ export class App {
         this.runnerList.forEach(runner => {
             runner.update(deltaTime);
         });
-        this.runnerList = this.runnerList.filter(runner => this.renderer.isVisible(runner.sprite));
+        this.runnerList = this.runnerList.filter(runner => {
+            if (Math.abs(runner.collisionFactor - 1.0) <= Number.EPSILON) {
+                this.life = Math.max(0, this.life - 20);
+                return false;
+            }
+
+            return this.renderer.isVisible(runner.sprite);
+        });
         this.runnerList = this.runnerList.sort((runnerA, runnerB) => runnerA.y - runnerB.y);
         this.runnerList.forEach(runner => {
             if (this.player.collides(runner)) {
@@ -131,9 +157,13 @@ export class App {
         this.renderer.drawRunner(this.player);
         backRunners.forEach(drawRunner);
 
+        this.renderer.drawLifeBar(this.life);
+
         this.renderer.drawScore(this.score);
 
-        if (!this.running) {
+        if (this.state === GAME_INIT_STATE) {
+
+        } else if (this.state === GAME_FOCUS_LOST_STATE || this.state === GAME_PAUSED_STATE) {
             this.renderer.drawPaused();
         }
     }
@@ -148,15 +178,24 @@ export class App {
         
         this.input.handle(deltaTime);
 
-        if (this.input.isPausePressed) {
-            if (this.running) {
-                this.pause();
-            } else {
-                this.resume();
+        if (this.state === GAME_INIT_STATE) {
+            if (this.input.isStartPressed) {
+                this.resume(true);
+                this.state = GAME_RUNNING_STATE;
+            }
+        } else if (this.state === GAME_RUNNING_STATE || this.state === GAME_PAUSED_STATE) {
+            if (this.input.isPausePressed) {
+                if (this.state === GAME_RUNNING_STATE) {
+                    this.pause();
+                    this.state = GAME_PAUSED_STATE;
+                } else {
+                    this.resume();
+                    this.state = GAME_RUNNING_STATE;
+                }
             }
         }
 
-        if (this.running) {
+        if (this.state === GAME_RUNNING_STATE) {
             this.update(deltaTime);
         }
 
