@@ -42,6 +42,7 @@ export class App {
             }
         }, 0);
 
+        this.life = 100;
         this.player = new Runner(this.clock);
         this.runnerList = [];
         this.runnerSpawner = new RunnerSpawner(this.clock, this.player);
