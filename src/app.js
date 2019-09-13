@@ -6,7 +6,8 @@ import { Timer } from './timer';
 import { Rect } from './rect';
 import { RunnerSpawner } from './spawner';
 import { CPlayer } from './player-small';
-import { song_running } from './song_running';
+import { songRunning } from './song_running';
+import { AudioManager } from './audio_manager';
 
 const GAME_INIT_STATE = 0;
 const GAME_RUNNING_STATE = 1;
@@ -15,6 +16,8 @@ const GAME_PAUSED_STATE = 3;
 const GAME_LOSE_STATE = 4;
 
 const TIMEOUT_LIST = [500, 500, 250, 250, 500, 500, 500, 1000, 500, 500, 250, 250, 250, 250, 500, 1500];
+
+const MAX_LIFE = 100;
 
 export class App {
     constructor() {
@@ -29,23 +32,9 @@ export class App {
         this.score = 0;
 
         this.renderer = new Renderer('game-render');
+        this.audioManager = new AudioManager();
 
-        this.songManager = new CPlayer();
-        this.songManager.init(song_running);
-        this.audio = document.createElement('audio');
-        
-        const id = setInterval(() => {
-            const done = this.songManager.generate() >= 1;
-            if (done) {
-                clearInterval(id);
-                const wave = this.songManager.createWave();
-                const src = URL.createObjectURL(new Blob([wave], {type: 'audio/wav'}));
-                this.audio.loop = true;
-                this.audio.src = src;
-            }
-        }, 0);
-
-        this.life = 100;
+        this.life = MAX_LIFE;
         this.player = new Runner(this.clock);
         this.runnerList = [];
         this.runnerSpawner = new RunnerSpawner(this.clock, this.player);
@@ -84,14 +73,24 @@ export class App {
 
     resume(force=false) {
         if (force || this.state === GAME_RUNNING_STATE || this.state === GAME_FOCUS_LOST_STATE || this.state === GAME_PAUSED_STATE) {
-            this.audio.play();
-            this.runnerSpawner.reset();
+            this.audioManager.playRunningSong();
         }
     }
 
     pause() {
         if (this.state === GAME_RUNNING_STATE) {
-            this.audio.pause();
+            this.audioManager.pauseRunningSong();
+        }
+    }
+
+    reset() {
+        if (this.state === GAME_LOSE_STATE) {
+            this.runnerList = [];
+            this.runnerSpawner.reset();
+
+            this.audioManager.resetRunningSong();
+
+            this.life = MAX_LIFE;
         }
     }
 
@@ -115,6 +114,7 @@ export class App {
         this.runnerList = this.runnerList.filter(runner => {
             if (Math.abs(runner.collisionFactor - 1.0) <= Number.EPSILON) {
                 this.life = Math.max(0, this.life - 20);
+                this.audioManager.playCrashSong();
                 return false;
             }
 
@@ -142,6 +142,10 @@ export class App {
             }
             
             this.score++;
+        }
+
+        if (this.life == 0) {
+            this.state = GAME_LOSE_STATE;
         }
     }
 
@@ -192,6 +196,11 @@ export class App {
                     this.resume();
                     this.state = GAME_RUNNING_STATE;
                 }
+            }
+        } else if (this.state === GAME_LOSE_STATE) {
+            if (this.input.isStartPressed) {
+                this.reset();
+                this.state = GAME_RUNNING_STATE;
             }
         }
 

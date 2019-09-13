@@ -5,7 +5,7 @@
     // use it in a demo.
 
     // Song data
-    export const song_running = {
+    export const songRunning = {
       songData: [
         { // Instrument 0
           i: [
