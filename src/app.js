@@ -145,6 +145,7 @@ export class App {
         }
 
         if (this.life == 0) {
+            this.input.reset();
             this.state = GAME_LOSE_STATE;
         }
     }
@@ -166,9 +167,11 @@ export class App {
         this.renderer.drawScore(this.score);
 
         if (this.state === GAME_INIT_STATE) {
-
+            this.renderer.drawInit();
         } else if (this.state === GAME_FOCUS_LOST_STATE || this.state === GAME_PAUSED_STATE) {
             this.renderer.drawPaused();
+        } else if (this.state === GAME_LOSE_STATE) {
+            this.renderer.drawLose();
         }
     }
 
@@ -185,6 +188,7 @@ export class App {
         if (this.state === GAME_INIT_STATE) {
             if (this.input.isStartPressed) {
                 this.resume(true);
+                this.input.reset();
                 this.state = GAME_RUNNING_STATE;
             }
         } else if (this.state === GAME_RUNNING_STATE || this.state === GAME_PAUSED_STATE) {
@@ -200,6 +204,7 @@ export class App {
         } else if (this.state === GAME_LOSE_STATE) {
             if (this.input.isStartPressed) {
                 this.reset();
+                this.input.reset();
                 this.state = GAME_RUNNING_STATE;
             }
         }

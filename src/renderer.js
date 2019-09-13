@@ -45,6 +45,15 @@ export class Renderer {
             return false;
         }
     }
+    
+    drawInit() {
+        this.context.font = '20px sans-serif';
+        this.context.textAlign = 'center';
+        this.context.fillStyle = '#333';
+        this.context.fillText('Use Left/Right arrows or A/D keys to move', this.rect.width / 2, this.rect.height / 2 - 80);
+        this.context.fillText('Use Esc/P keys to pause', this.rect.width / 2, this.rect.height / 2 - 40);
+        this.context.fillText('Press Enter and run~', this.rect.width / 2, this.rect.height / 2 + 10);
+    }
 
     drawPaused() {
         this.context.font = '60px sans-serif';
@@ -56,6 +65,13 @@ export class Renderer {
         this.context.fillRect(this.rect.width / 5, this.rect.height / 2 - 50, 3 * this.rect.width / 5, 70);        
         this.context.fillStyle = '#333';
         this.context.fillText('PAUSED', this.rect.width / 2, this.rect.height / 2);
+    }
+
+    drawLose() {
+        this.context.font = '20px sans-serif';
+        this.context.textAlign = 'center';
+        this.context.fillStyle = '#333';
+        this.context.fillText('Press enter and run again~', this.rect.width / 2, this.rect.height / 2);
     }
 
     clear() {

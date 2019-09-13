@@ -73,6 +73,11 @@ export class Input {
         return startPressed;
     }
 
+    reset() {
+        this.pausePressed = false;
+        this.startPressed = false;
+    }
+
     handle(delta) {
         this.pauseKeyCurrentState = Keyboard.VK_PAUSE;
         if (this.pauseKeyCurrentState === false && this.pauseKeyPreviousState === true) {
