@@ -13,38 +13,47 @@ const DEFAULT_RUNNER_HEIGHT = 256;
 const DEFAULT_ANIM_TIME    = 200;
 const DEFAULT_RUNNER_SPEED = 30;
 
-export class Runner extends Sprite {
-    constructor(clock, rect=new Rect(DEFAULT_RUNNER_X, DEFAULT_RUNNER_Y, DEFAULT_RUNNER_X+DEFAULT_RUNNER_WIDTH, DEFAULT_RUNNER_Y+DEFAULT_RUNNER_HEIGHT), speed=DEFAULT_RUNNER_SPEED) {
-        super(Runner.buildRunnerImage(), rect);
+export class Runner {
+    constructor(clock, rect=Rect.from({x: DEFAULT_RUNNER_X, y: DEFAULT_RUNNER_Y, width: DEFAULT_RUNNER_WIDTH, height: DEFAULT_RUNNER_HEIGHT}), speed=DEFAULT_RUNNER_SPEED) {
+        this.spriteRect = rect;
+
+        this.staticSprite = new Sprite(Runner.buildRunnerImage(), this.spriteRect);
+        this.leftMoveSprite = new Sprite(Runner.buildRunnerImage(), this.spriteRect);
+        this.rightMoveSprite = new Sprite(Runner.buildRunnerImage(), this.spriteRect);
+        this.sprite = this.staticSprite;
 
         this.speed = speed;
 
-        // this.imageRect.width = this.depth * (DEFAULT_RUNNER_WIDTH - MIN_RUNNER_WIDTH) / MAX_DEPTH + MIN_RUNNER_WIDTH;
+        // this.spriteRect.width = this.depth * (DEFAULT_RUNNER_WIDTH - MIN_RUNNER_WIDTH) / MAX_DEPTH + MIN_RUNNER_WIDTH;
 
-        let dx = 0.1 * this.imageRect.width;
-        let dy = this.imageRect.height / 4;
+        let dx = this.spriteRect.width / 4;
+        let dy = this.spriteRect.height / 4;
         this.collisionRect = new Rect(
-            this.imageRect.left + dx, 
-            this.imageRect.top + dy,
-            this.imageRect.right - dx,
-            this.imageRect.bottom - dy);
+            this.spriteRect.left + dx,
+            this.spriteRect.top + dy,
+            this.spriteRect.right - dx,
+            this.spriteRect.bottom - dy);
         
         this.animTimer = new Timer(clock, DEFAULT_ANIM_TIME * DEFAULT_RUNNER_SPEED / speed);
         this.animSpeed = -speed;
+
+        console.log(this);
     }
 
     static buildRunnerImage(color='#0f0') {
         const canvas = document.createElement('canvas');
-        canvas.width = 20;
-        canvas.height = 32;
+        canvas.width = 120;
+        canvas.height = 256;
 
         const context = canvas.getContext('2d');
         context.fillStyle = color;
 
+        // Head
         context.beginPath();
         context.arc(canvas.width / 2, canvas.height / 8, canvas.height / 8, 0, 2 * Math.PI);
         context.fill();
 
+        // Trunk
         context.beginPath();
         context.moveTo(canvas.width / 2, canvas.height / 4);
         context.lineTo(canvas.width / 8, canvas.height / 4);
@@ -56,6 +65,7 @@ export class Runner extends Sprite {
         context.closePath();
         context.fill();
 
+        // Legs
         context.beginPath();
         context.moveTo(canvas.width / 4, canvas.height / 2);
         context.lineTo(canvas.width / 4, canvas.height);
@@ -68,59 +78,51 @@ export class Runner extends Sprite {
     }
 
     get x() {
-        return this.imageRect.x;
+        return this.spriteRect.x;
     }
 
     set x(value) {
-        this.imageRect.x = value;
-
-        // this.collisionRect.x = this.imageRect.x + 0.1 * this.imageRect.width;
-        // this.collisionRect.width = 0.8 * this.imageRect.width;
+        this.spriteRect.x = value;
         
-        let dx = 0.1 * this.imageRect.width;
-        this.collisionRect.left = this.imageRect.left + dx;
-        this.collisionRect.right = this.imageRect.right - dx;
+        let dx = this.spriteRect.width / 4;
+        this.collisionRect.left = this.spriteRect.left + dx;
+        this.collisionRect.right = this.spriteRect.right - dx;
     }
 
     get y() {
-        return this.imageRect.y;
+        return this.spriteRect.y;
     }
 
     set y(value) {
-        this.imageRect.y = value;
-        
-        // this.collisionRect.y = value + this.imageRect.height / 2;
-        
-        let dy = this.imageRect.height / 4;
-        this.collisionRect.top = this.imageRect.top + dy;
-        this.collisionRect.bottom = this.imageRect.bottom + dy;
+        this.spriteRect.y = value;
+                
+        let dy = this.spriteRect.height / 4;
+        this.collisionRect.top = this.spriteRect.top + dy;
+        this.collisionRect.bottom = this.spriteRect.bottom + dy;
     }
 
     get width() {
-        return this.imageRect.width;
+        return this.spriteRect.width;
     }
 
     set width(value) {
-        this.imageRect.width = value;
+        this.spriteRect.width = value;
 
-        // this.collisionRect.x = this.imageRect.x + 0.1 * this.imageRect.width;
-        // this.collisionRect.width = 0.8 * this.imageRect.width;
-        let dx = 0.1 * this.imageRect.width;
-        this.collisionRect.left = this.imageRect.left + dx;
-        this.collisionRect.right = this.imageRect.right - dx;
+        let dx = this.spriteRect.width / 4;
+        this.collisionRect.left = this.spriteRect.left + dx;
+        this.collisionRect.right = this.spriteRect.right - dx;
     }
 
     get height() {
-        return this.imageRect.height;
+        return this.spriteRect.height;
     }
 
     set height(value) {
-        this.imageRect.height = value;
+        this.spriteRect.height = value;
 
-        // this.collisionRect.bottom = this.imageRect.bottom;
-        let dy = this.imageRect.height / 4;
-        this.collisionRect.top = this.imageRect.top + dy;
-        this.collisionRect.bottom = this.imageRect.bottom - dy;
+        let dy = this.spriteRect.height / 4;
+        this.collisionRect.top = this.spriteRect.top + dy;
+        this.collisionRect.bottom = this.spriteRect.bottom - dy;
     } 
 
     collides(other) {
@@ -135,14 +137,13 @@ export class Runner extends Sprite {
             this.animSpeed *= -1;
         }
 
-
         //this.image.context.fillRect();
         // this.rect.y += deltaTime * this.animSpeed;
     }
 
     draw(context) {
-        super.draw(context);
-
+        this.sprite.draw(context);
+        
         context.strokeRect(
             this.collisionRect.x, 
             this.collisionRect.y,
@@ -160,7 +161,9 @@ export class AutonomousRunner extends Runner {
     }
 
     set color(value) {
-        this.image = Runner.buildRunnerImage(value);
+        this.staticSprite.image = Runner.buildRunnerImage(value);
+        this.leftMoveSprite.image = Runner.buildRunnerImage(value);
+        this.rightMoveSprite.image = Runner.buildRunnerImage(value);
     }
     
     update(deltaTime) {

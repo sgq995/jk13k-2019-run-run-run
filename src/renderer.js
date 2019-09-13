@@ -23,13 +23,19 @@ export class Renderer {
     }
 
     drawSprite(sprite) {
-        if (this.isVisible(sprite))
-        {
+        if (this.isVisible(sprite)) {
             sprite.draw(this.context);
             return true;
+        } else {
+            return false;
         }
-        else
-        {
+    }
+
+    drawRunner(runner) {
+        if (this.isVisible(runner.sprite)) {
+            runner.draw(this.context);
+            return true;
+        } else {
             return false;
         }
     }

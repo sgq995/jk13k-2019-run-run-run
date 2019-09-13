@@ -90,8 +90,8 @@ export class App {
         this.runnerList.forEach(runner => {
             runner.update(deltaTime);
         });
-        this.runnerList.filter(runner => this.renderer.isVisible(runner));
-        this.runnerList.sort((runnerA, runnerB) => runnerA.y - runnerB.y);
+        this.runnerList = this.runnerList.filter(runner => this.renderer.isVisible(runner.sprite));
+        this.runnerList = this.runnerList.sort((runnerA, runnerB) => runnerA.y - runnerB.y);
         this.runnerList.forEach(runner => {
             if (this.player.collides(runner)) {
                 runner.color = '#f00';
@@ -122,10 +122,10 @@ export class App {
         const frontRunners = this.runnerList.filter(runner => runner.y <= this.player.y);
         const backRunners = this.runnerList.filter(runner => runner.y > this.player.y);
 
-        const drawRunner = runner => this.renderer.drawSprite(runner);
+        const drawRunner = runner => this.renderer.drawRunner(runner);
 
         frontRunners.forEach(drawRunner);
-        this.renderer.drawSprite(this.player);
+        this.renderer.drawRunner(this.player);
         backRunners.forEach(drawRunner);
 
         this.renderer.drawScore(this.score);
