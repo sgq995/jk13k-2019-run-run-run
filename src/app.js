@@ -93,6 +93,9 @@ export class App {
             this.audioManager.resetRunningSong();
 
             this.life = MAX_LIFE;
+            this.currentScoreIdx = 0;
+            this.currentScoreTimeout = TIMEOUT_LIST[this.currentScoreIdx];
+            this.score = 0;
         }
     }
 
