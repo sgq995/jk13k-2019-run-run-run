@@ -19,7 +19,13 @@ export class Renderer {
     drawScore(score) {
         this.context.font = '30px sans-serif';
         this.context.textAlign = 'center';
+        this.context.fillStyle = '#333';
         this.context.fillText(`${score}`, this.rect.width / 2, 30);
+    }
+
+    drawLifeBar(life) {
+        this.context.fillStyle = '#0ff';
+        this.context.fillRect(30, 15, life, 15);
     }
 
     drawSprite(sprite) {
@@ -43,6 +49,12 @@ export class Renderer {
     drawPaused() {
         this.context.font = '60px sans-serif';
         this.context.textAlign = 'center';
+        this.context.fillStyle = '#ddd';
+        this.context.fillRect(0, this.rect.height / 2 - 35, this.rect.width / 4, 70);
+        this.context.fillRect(3 * this.rect.width / 4, this.rect.height / 2 - 35, this.rect.width / 4, 70);
+        this.context.fillStyle = '#eee';
+        this.context.fillRect(this.rect.width / 5, this.rect.height / 2 - 50, 3 * this.rect.width / 5, 70);        
+        this.context.fillStyle = '#333';
         this.context.fillText('PAUSED', this.rect.width / 2, this.rect.height / 2);
     }
 
