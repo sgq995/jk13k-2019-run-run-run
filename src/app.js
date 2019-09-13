@@ -8,14 +8,11 @@ import { RunnerSpawner } from './spawner';
 import { CPlayer } from './player-small';
 import { song_running } from './song_running';
 
-const timeoutList = [500, 500, 250, 250, 500, 500, 500, 1000, 500, 500, 250, 250, 250, 250, 500, 1500];
+const TIMEOUT_LIST = [500, 500, 250, 250, 500, 500, 500, 1000, 500, 500, 250, 250, 250, 250, 500, 1500];
 
 export class App {
     constructor() {
-        document.addEventListener('visibilitychange', e => document['hidden'] ? this.stop() : this.start());
-        window.addEventListener('blur', e => this.pause());
-        window.addEventListener('focus', e => this.resume());
-
+        this.started = false;
         this.running = false;
         this.requestAnimationId = -1;
 
@@ -23,7 +20,7 @@ export class App {
         this.timer = new Timer(this.clock);
 
         this.currentScoreIdx = 0;
-        this.currentScoreTimeout = timeoutList[this.currentScoreIdx];
+        this.currentScoreTimeout = TIMEOUT_LIST[this.currentScoreIdx];
         this.score = 0;
 
         this.renderer = new Renderer('game-render');
@@ -31,6 +28,7 @@ export class App {
         this.songManager = new CPlayer();
         this.songManager.init(song_running);
         this.audio = document.createElement('audio');
+        
         const id = setInterval(() => {
             const done = this.songManager.generate() >= 1;
             if (done) {
@@ -49,6 +47,10 @@ export class App {
         this.runnerSpawner = new RunnerSpawner(this.clock, this.player);
 
         this.input = new Input(this.player);
+
+        document.addEventListener('visibilitychange', e => document['hidden'] ? this.stop() : this.start());
+        window.addEventListener('blur', e => this.pause());
+        window.addEventListener('focus', e => this.resume());
     }
 
     start() {
@@ -63,8 +65,8 @@ export class App {
     }
 
     resume() {
-        this.runnerSpawner.reset();
         this.audio.play();
+        this.runnerSpawner.reset();
         this.running = true;
     }
 
@@ -94,17 +96,17 @@ export class App {
         this.runnerList = this.runnerList.sort((runnerA, runnerB) => runnerA.y - runnerB.y);
         this.runnerList.forEach(runner => {
             if (this.player.collides(runner)) {
-                runner.color = '#f00';
+                runner.isCollided = true;
             } else {
-                runner.color = '#00f';
+                runner.isCollided = false;
             }
         });
 
         if (this.timer.deltaStart() >= this.currentScoreTimeout) {
             this.timer.reset();
 
-            const nextScoreIdx = (this.currentScoreIdx + 1) % timeoutList.length;
-            const nextScoreTimeout = timeoutList[nextScoreIdx];
+            const nextScoreIdx = (this.currentScoreIdx + 1) % TIMEOUT_LIST.length;
+            const nextScoreTimeout = TIMEOUT_LIST[nextScoreIdx];
             
             this.currentScoreIdx = nextScoreIdx;
             this.currentScoreTimeout = nextScoreTimeout;
