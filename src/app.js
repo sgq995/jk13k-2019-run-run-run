@@ -45,10 +45,7 @@ export class App {
         }, 0);
 
         this.player = new Runner(this.clock);
-        this.runnerList = [
-            // new AutonomousRunner(this.player.speed, this.clock, Rect.from({ x: 140, y: 40/*, width: 80, height: 128*/ }), 15),
-            // new AutonomousRunner(this.player.speed, this.clock, Rect.from({ x: 320, y: 40/*, width: 80, height: 128*/ }), 5)
-        ];
+        this.runnerList = [];
         this.runnerSpawner = new RunnerSpawner(this.clock, this.player);
 
         this.input = new Input(this.player);
@@ -96,13 +93,10 @@ export class App {
         this.runnerList.filter(runner => this.renderer.isVisible(runner));
         this.runnerList.sort((runnerA, runnerB) => runnerA.y - runnerB.y);
         this.runnerList.forEach(runner => {
-            const context = runner.image.getContext('2d');
             if (this.player.collides(runner)) {
-                context.fillStyle = '#f00';
-                context.fillRect(0, 0, runner.image.width, runner.image.height);
+                runner.color = '#f00';
             } else {
-                context.fillStyle = '#00f';
-                context.fillRect(0, 0, runner.image.width, runner.image.height);
+                runner.color = '#00f';
             }
         });
 

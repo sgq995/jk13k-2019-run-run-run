@@ -10,18 +10,14 @@ const DEFAULT_RUNNER_Y      = 360;
 const DEFAULT_RUNNER_WIDTH  = 120;
 const DEFAULT_RUNNER_HEIGHT = 256;
 
-const MAX_DEPTH = 100;
-
-const DEFAULT_DEPTH        = 0;
 const DEFAULT_ANIM_TIME    = 200;
 const DEFAULT_RUNNER_SPEED = 30;
 
 export class Runner extends Sprite {
-    constructor(clock, rect=new Rect(DEFAULT_RUNNER_X, DEFAULT_RUNNER_Y, DEFAULT_RUNNER_X+DEFAULT_RUNNER_WIDTH, DEFAULT_RUNNER_Y+DEFAULT_RUNNER_HEIGHT), speed=DEFAULT_RUNNER_SPEED, depth=DEFAULT_DEPTH) {
+    constructor(clock, rect=new Rect(DEFAULT_RUNNER_X, DEFAULT_RUNNER_Y, DEFAULT_RUNNER_X+DEFAULT_RUNNER_WIDTH, DEFAULT_RUNNER_Y+DEFAULT_RUNNER_HEIGHT), speed=DEFAULT_RUNNER_SPEED) {
         super(Runner.buildRunnerImage(), rect);
 
         this.speed = speed;
-        this.depth = Math.min(depth, MAX_DEPTH);
 
         // this.imageRect.width = this.depth * (DEFAULT_RUNNER_WIDTH - MIN_RUNNER_WIDTH) / MAX_DEPTH + MIN_RUNNER_WIDTH;
 
@@ -37,14 +33,36 @@ export class Runner extends Sprite {
         this.animSpeed = -speed;
     }
 
-    static buildRunnerImage() {
+    static buildRunnerImage(color='#0f0') {
         const canvas = document.createElement('canvas');
         canvas.width = 20;
         canvas.height = 32;
 
         const context = canvas.getContext('2d');
-        context.fillStyle = '#0f0';
-        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = color;
+
+        context.beginPath();
+        context.arc(canvas.width / 2, canvas.height / 8, canvas.height / 8, 0, 2 * Math.PI);
+        context.fill();
+
+        context.beginPath();
+        context.moveTo(canvas.width / 2, canvas.height / 4);
+        context.lineTo(canvas.width / 8, canvas.height / 4);
+        context.arcTo(0, canvas.height / 4, 0, canvas.height / 4 + canvas.height / 8, canvas.height / 8);
+        context.lineTo(0, 3 * canvas.height / 5);
+        context.lineTo(canvas.width, 3 * canvas.height / 5);
+        context.lineTo(canvas.width, canvas.height / 4 + canvas.height / 8);
+        context.arcTo(canvas.width, canvas.height / 4, canvas.width - canvas.width / 8, canvas.height / 4, canvas.height / 8);
+        context.closePath();
+        context.fill();
+
+        context.beginPath();
+        context.moveTo(canvas.width / 4, canvas.height / 2);
+        context.lineTo(canvas.width / 4, canvas.height);
+        context.lineTo(3 * canvas.width / 4, canvas.height);
+        context.lineTo(3 * canvas.width / 4, canvas.height / 2);
+        context.closePath();
+        context.fill();
 
         return canvas;
     }
@@ -117,6 +135,7 @@ export class Runner extends Sprite {
             this.animSpeed *= -1;
         }
 
+
         //this.image.context.fillRect();
         // this.rect.y += deltaTime * this.animSpeed;
     }
@@ -136,7 +155,12 @@ export class AutonomousRunner extends Runner {
     constructor(targetSpeed, ...args) {
         super(...args);
 
+        this.color = '#00f';
         this.targetSpeed = targetSpeed;
+    }
+
+    set color(value) {
+        this.image = Runner.buildRunnerImage(value);
     }
     
     update(deltaTime) {
