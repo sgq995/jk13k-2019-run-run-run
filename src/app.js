@@ -39,6 +39,8 @@ export class App {
         this.runnerList = [];
         this.runnerSpawner = new RunnerSpawner(this.clock, this.player);
 
+        this.difficultyIncreased = false;
+
         this.input = new Input(this.player);
 
         document.addEventListener('visibilitychange', e => {
@@ -128,6 +130,16 @@ export class App {
                 runner.isCollided = false;
             }
         });
+
+        if ((this.score % 15) === 0) {
+            if (!this.difficultyIncreased) {
+                this.difficultyIncreased = true;
+                console.log(this.runnerSpawner.maxTimeout);
+                this.runnerSpawner.timeout -= deltaTime * this.runnerSpawner.maxTimeout;
+            }
+        } else {
+            this.difficultyIncreased = false;
+        }
 
         if (this.timer.deltaStart() >= this.currentScoreTimeout) {
             this.timer.reset();

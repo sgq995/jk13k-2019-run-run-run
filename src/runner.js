@@ -235,7 +235,7 @@ export class AutonomousRunner extends Runner {
 
         let speed = this.targetSpeed - this.speed;
         
-        let collisionFactorDelta = deltaTime * speed / this.targetSpeed;
+        let collisionFactorDelta = 2 * deltaTime * speed / this.targetSpeed;
         if (this.isCollided && this.collisionFactor < 1.0) {
             this.collisionFactor = Math.min(this.collisionFactor + collisionFactorDelta, 1.0);
             this.updateColor();

@@ -9,8 +9,8 @@ const MIN_RUNNER_SPEED = 10;
 
 const DEFAULT_RUNNER_Y_SPAWN = 40;
 
-const MIN_RUNNER_SPAWN_TIME = 5000;
-const MAX_RUNNER_SPWAN_TIME = 7000;
+const MIN_RUNNER_SPAWN_TIME = 1000;
+const MAX_RUNNER_SPWAN_TIME = 5000;
 
 function normalRandom(mu=0.5, sigma=2) {
     let u1 = Math.random();
@@ -40,19 +40,34 @@ export class RunnerSpawner extends Spawner {
     constructor(...args) {
         super(...args);
 
-        this.timer.setTimeout(RunnerSpawner.generateSpwanTimeout());
+        this.minTimeout = MIN_RUNNER_SPAWN_TIME;
+        this.maxTimeout = MAX_RUNNER_SPWAN_TIME;
+
+        this.timer.setTimeout(RunnerSpawner.generateSpwanTimeout(this.minTimeout, this.maxTimeout));
+    }
+
+    get timeout() {
+        return this.maxTimeout;
+    }
+
+    set timeout(value) {
+        this.maxTimeout = Math.max(this.minTimeout, value);
     }
 
     static generateRunner(player, clock) {
-        let mu = player.x / 480;
-        // let runnerX = parseInt(normalRandom(mu) * (MAX_RUNNER_X_SPAWN - MIN_RUNNER_X_SPAWN) + MIN_RUNNER_X_SPAWN);
-        let runnerX = parseInt(normalRandom((MAX_RUNNER_X_SPAWN - MIN_RUNNER_X_SPAWN) / 2 + MIN_RUNNER_X_SPAWN, (MAX_RUNNER_X_SPAWN - MIN_RUNNER_X_SPAWN) / 2 / 3));
+        // (MAX_RUNNER_X_SPAWN - MIN_RUNNER_X_SPAWN) / 2 + MIN_RUNNER_X_SPAWN
+        // (MAX_RUNNER_X_SPAWN - MIN_RUNNER_X_SPAWN) / 2 / 3
+        let sigma = DEFAULT_RUNNER_Y_SPAWN / player.y * player.width;
+        let runnerX = parseInt(
+            normalRandom(player.x + player.width / 2, 
+                sigma / 3));
+        runnerX = Math.max(MIN_RUNNER_X_SPAWN, Math.min(runnerX, MAX_RUNNER_X_SPAWN));
         let runnerSpeed = Math.random() * (player.speed / 8 - MIN_RUNNER_SPEED) + MIN_RUNNER_SPEED;
         return new AutonomousRunner(player.speed, clock, Rect.from({ x: runnerX, y: DEFAULT_RUNNER_Y_SPAWN }), runnerSpeed);
     }
 
-    static generateSpwanTimeout() {
-        return parseInt(Math.random() * (MAX_RUNNER_SPWAN_TIME - MIN_RUNNER_SPAWN_TIME) + MIN_RUNNER_SPAWN_TIME);
+    static generateSpwanTimeout(min, max) {
+        return parseInt(Math.random() * (max - min) + min);
     }
 
     reset() {
@@ -63,7 +78,7 @@ export class RunnerSpawner extends Spawner {
         this.timer.update();
         if (this.timer.timeout()) {
             this.timer.reset();
-            this.timer.setTimeout(RunnerSpawner.generateSpwanTimeout());
+            this.timer.setTimeout(RunnerSpawner.generateSpwanTimeout(this.minTimeout, this.maxTimeout));
             return RunnerSpawner.generateRunner(this.player, this.clock);
         } else {
             return null;
